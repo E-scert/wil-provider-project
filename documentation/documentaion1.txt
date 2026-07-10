@@ -1,0 +1,83 @@
+
+------------------------------
+WIL Portal: Shared Technical Specification Document
+System Focus: Work Integrated Learning (WIL) Student Job Matching Platform
+Target Audience: Frontend Developers & Backend Developers
+Database Manager: You
+------------------------------
+1. Conceptual Data Models (The Core Entities)
+The database architecture is split into clean, modular blocks. Your team will interact with these objects via the [Supabase API Client](https://supabase.com/docs/guides/api/rest/client-libs). [1] 
+User Core (Authentication)
+Every user in the system (Student or Company Representative) must have an account entry.
+
+* Fields: user_id, password_hash, user_type (student, company, or admin), date_created.
+* Team Directive: Use [Supabase Auth](https://supabase.com/docs/guides/auth) to handle logins. When a user logs in, capture their profile type to redirect them to the correct dashboard.
+
+Student Profile & Application Stack
+A student profile is split into three related modules to optimize data fetching:
+
+   1. Student Core: Stores identity data (name, surname, sex, age).
+   2. Student Details: Stores contact and academic classification data (student_email, personal_email, course_field, cell_no).
+   3. Student Skills: Stores capabilities (portfolio_url, programming_languages as an array list).
+
+Student Documents Tracker (stud_docs)
+Instead of storing heavy PDF binary data inside the database, this table acts as a pointer index to files saved in the cloud bucket.
+
+* Fields: wil_doc_path, id_doc_path, academic_doc_path, updated_at.
+* Important Note: These fields store structural string paths (e.g., documents/student-uuid/id_doc.pdf), not open URLs.
+
+Company & Placement Listings (company & wil_program)
+
+* Company Profile: Stores profile and location criteria (comp_name, comp_email, comp_description, plus complete physical address components).
+* WIL Program: Represents active job/placement listings. Crucial fields include program_name, duration_months, program_field, open_date, close_date, and slots_open (an integer tracking active hiring capacity).
+
+Application Logs (student_app)
+Tracks student applications sent to corporate listings.
+
+* Fields: app_id, stud_id, program_id, status (Pending, Reviewed, Accepted, Rejected), date_applied.
+
+------------------------------
+ 2. Automated Database Rules (What the DB Does for You)
+The database handles significant automation natively. The backend and frontend teams do not need to build logic for the following workflows, as the database takes care of them autonomously:
+
+   1. Auto-linking Documents: When a file is successfully uploaded to the storage bucket, the database automatically creates/updates the record in the stud_docs tracking table.
+   2. Pre-Application Slot Blocking: The database will explicitly reject and throw an error for any attempt to insert an application into a program where slots_open <= 0.
+   3. Capacity Auto-Decrement: When a company shifts an application status to Accepted, the database automatically reduces slots_open by 1.
+   4. Cascade Auto-Rejections: The instant a program’s slots_open counter hits 0 due to an acceptance, the database automatically converts all other remaining Pending applicants for that program to Rejected.
+
+------------------------------
+3. Action Items for the Frontend Team## User Registration & Login Experience
+
+* Route users based on their user_type from the session profile.
+* When a student logs in, restrict queries using session parameters so they only view their personal dashboard rows.
+
+Document Upload Panel
+
+* Build an interface allowing students to select three local PDF files (ID, WIL log, Transcript).
+* Upload these directly via the Supabase Storage client into a private bucket named student-vault.
+* Use the exact structural folder format: documents/{student_id}/{filename}.pdf. Name the files specifically: id_doc.pdf, wil_doc.pdf, and academic_doc.pdf.
+
+Job Board List Controls
+
+* Before rendering an "Apply Now" button for a placement, read the listing's slots_open variable.
+* If slots_open is 0, visually gray out the button, disable click actions, and update the text to read "Applications Closed".
+
+------------------------------
+ 4. Action Items for the Backend / API Team## Handling the Application Intent
+
+* When a student triggers an application, run a simple data row insertion statement into the student_app table mapping stud_id and program_id.
+* Crucial: Wrap this command in a standard block to catch system errors. If the database throws a capacity exception because a slot filled up a millisecond prior, catch that error message and return a clean alert to the user interface: "This program is now full."
+
+The Secure Corporate Email Pipeline
+When an application succeeds, you must immediately format and send an email notification to the company (comp_email).
+
+* Do not attach physical PDFs to the email. Large files clog inbound corporate mail servers.
+* Use the [Supabase storage SDK](https://supabase.com/docs/guides/storage) to generate Signed URLs for that student’s three document paths. Configure the token expiry lifetime to 7 days (604800 seconds).
+* Construct a professional email template and embed these expiring signed URLs into clear text call-to-action download links.
+
+Student Status Notification Webhook
+
+* Set up an endpoint (or a Supabase Edge Function) to listen for database changes on the student_app table's status column.
+* When a status transitions to Accepted or Rejected (whether done manually by a company or automatically by the database cascade), catch the student's email and dispatch a notification email informing them of the intake selection update.
+
+------------------------------

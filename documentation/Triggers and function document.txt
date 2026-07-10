@@ -1,0 +1,58 @@
+Trigger & Function Documentation
+
+1. `check_program_capacity` (BEFORE INSERT on `student_app`)
+- Purpose: Prevents students from applying to a WIL program that has no slots left.  
+- Logic:  
+  - Queries the `wil_program.slots_open` value.  
+  - If `slots_open <= 0`, raises an exception and blocks the insert.  
+- Why it matters: Ensures data integrity by stopping “ghost applications” into full programs.  
+- Edge case: If multiple students apply at the same time, only the first succeeds; others are blocked.
+
+---
+
+2. `decrement_program_capacity` (AFTER UPDATE on `student_app`)
+- Purpose: Reduces available slots when a student’s application status changes to `Accepted`.  
+- Logic:  
+  - Checks if `NEW.status = 'Accepted'` and `OLD.status` was not already `Accepted`.  
+  - Updates `wil_program.slots_open = slots_open - 1` (only if slots are > 0).  
+- Why it matters: Keeps program capacity accurate as students are accepted.  
+- Edge case: Prevents negative slots with the safeguard `AND slots_open > 0`.
+
+---
+
+3. `auto_reject_remaining_applicants` (AFTER UPDATE OF `slots_open` on `wil_program`)
+- Purpose: Automatically rejects all pending applications once a program’s slots are depleted.  
+- Logic:  
+  - If `NEW.slots_open <= 0`, updates all `student_app` rows for that program where `status = 'Pending'` → `Rejected`.  
+- Why it matters: Prevents companies from being flooded with pending applications after capacity is reached.  
+- Edge case: Harsh enforcement — companies lose manual control once slots hit zero. Could be made optional with a flag.
+
+---
+
+4. `storage.auto_link_student_docs` (AFTER INSERT on `storage.objects`)
+- Purpose: Automatically links uploaded student documents (ID, WIL letter, academic record) to the `stud_docs` table.  
+- Logic:  
+  - Splits the file path into tokens, extracts the student UUID.  
+  - Detects doc type (`id`, `wil`, `academic`) based on filename.  
+  - Performs an upsert into `stud_docs`, updating the correct path column.  
+- Why it matters: Eliminates manual linking of uploaded files to student profiles.  
+- Edge case: Relies on consistent file naming conventions (`%id%`, `%wil%`, `%academic%`). If naming is inconsistent, docs won’t link correctly.
+
+---
+
+Security Considerations
+- Password storage: Must use salted hashing (bcrypt/argon2). Supabase Auth can handle this automatically.  
+- Document storage: Paths point to Supabase buckets. You’ll need **Row Level Security (RLS)** so:  
+  - Students can only view their own docs.  
+  - Companies can only view docs of applicants to their programs.  
+  - Admins can view everything.  
+- Triggers: Run as `SECURITY DEFINER`. Ensure only trusted roles can execute them to avoid privilege escalation.
+
+---
+
+ Developer Notes
+- Concurrency: Triggers handle race conditions by blocking inserts when slots are full and preventing negative decrements.  
+- Scalability: Skills normalized into `stud_skill_map` for efficient querying.  
+- Maintainability: Each trigger enforces business rules at DB level, reducing reliance on app logic.  
+
+
