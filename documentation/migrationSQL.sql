@@ -355,3 +355,110 @@ CREATE TRIGGER auto_link_student_docs_trigger
 AFTER INSERT ON public.stud_docs
 FOR EACH ROW
 EXECUTE FUNCTION public.auto_link_student_docs();
+
+- ---------------------------------------------------------------------
+-- 1. users — allow a freshly-authenticated user to create their own row
+-- ---------------------------------------------------------------------
+CREATE POLICY "Users can insert own row"
+ON users FOR INSERT
+WITH CHECK (auth.uid() = user_id);
+
+-- ---------------------------------------------------------------------
+-- 2. student — self-signup + self-edit
+-- ---------------------------------------------------------------------
+CREATE POLICY "Students can insert own profile"
+ON student FOR INSERT
+WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Students can update own profile"
+ON student FOR UPDATE
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
+
+-- ---------------------------------------------------------------------
+-- 3. stud_details — self-signup + self-edit
+-- ---------------------------------------------------------------------
+CREATE POLICY "Students can insert own details"
+ON stud_details FOR INSERT
+WITH CHECK (stud_id IN (SELECT stud_id FROM student WHERE user_id = auth.uid()));
+
+CREATE POLICY "Students can update own details"
+ON stud_details FOR UPDATE
+USING (stud_id IN (SELECT stud_id FROM student WHERE user_id = auth.uid()))
+WITH CHECK (stud_id IN (SELECT stud_id FROM student WHERE user_id = auth.uid()));
+
+-- ---------------------------------------------------------------------
+-- 4. stud_docs — needed for document upload
+-- ---------------------------------------------------------------------
+CREATE POLICY "Students can insert own docs"
+ON stud_docs FOR INSERT
+WITH CHECK (stud_id IN (SELECT stud_id FROM student WHERE user_id = auth.uid()));
+
+CREATE POLICY "Students can update own docs"
+ON stud_docs FOR UPDATE
+USING (stud_id IN (SELECT stud_id FROM student WHERE user_id = auth.uid()))
+WITH CHECK (stud_id IN (SELECT stud_id FROM student WHERE user_id = auth.uid()));
+
+-- ---------------------------------------------------------------------
+-- 5. stud_skill_map — 
+-- ---------------------------------------------------------------------
+CREATE POLICY "Students can view own skills"
+ON stud_skill_map FOR SELECT
+USING (stud_id IN (SELECT stud_id FROM student WHERE user_id = auth.uid()));
+
+CREATE POLICY "Students can insert own skills"
+ON stud_skill_map FOR INSERT
+WITH CHECK (stud_id IN (SELECT stud_id FROM student WHERE user_id = auth.uid()));
+
+CREATE POLICY "Students can delete own skills"
+ON stud_skill_map FOR DELETE
+USING (stud_id IN (SELECT stud_id FROM student WHERE user_id = auth.uid()));
+
+-- ---------------------------------------------------------------------
+-- 6. company — self-signup + self-edit
+-- ---------------------------------------------------------------------
+CREATE POLICY "Companies can insert own profile"
+ON company FOR INSERT
+WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Companies can update own profile"
+ON company FOR UPDATE
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
+
+-- ---------------------------------------------------------------------
+-- 7. company_address — self-signup + self-edit
+-- ---------------------------------------------------------------------
+CREATE POLICY "Companies can insert own address"
+ON company_address FOR INSERT
+WITH CHECK (comp_id IN (SELECT comp_id FROM company WHERE user_id = auth.uid()));
+
+CREATE POLICY "Companies can update own address"
+ON company_address FOR UPDATE
+USING (comp_id IN (SELECT comp_id FROM company WHERE user_id = auth.uid()))
+WITH CHECK (comp_id IN (SELECT comp_id FROM company WHERE user_id = auth.uid()));
+
+-- ---------------------------------------------------------------------
+-- 8. student_app — companies need UPDATE to accept/reject applicants
+
+-- ---------------------------------------------------------------------
+CREATE POLICY "Companies can update applicant status"
+ON student_app FOR UPDATE
+USING (
+  program_id IN (
+    SELECT program_id FROM wil_program
+    WHERE comp_id IN (SELECT comp_id FROM company WHERE user_id = auth.uid())
+  )
+)
+WITH CHECK (
+  program_id IN (
+    SELECT program_id FROM wil_program
+    WHERE comp_id IN (SELECT comp_id FROM company WHERE user_id = auth.uid())
+  )
+);
+
+
+-- =====================================================================
+DROP TRIGGER IF EXISTS auto_link_student_docs_trigger ON public.stud_docs;
+
+

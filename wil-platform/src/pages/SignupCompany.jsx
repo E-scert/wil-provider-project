@@ -1,13 +1,18 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { signUpCompany } from '../api/auth.js';
-import { useToast } from '../context/ToastContext.jsx';
-import { Card, Field, Input, Textarea, Button } from '../components/ui.jsx';
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { signUp } from "../api/auth.js";
+import { useToast } from "../context/ToastContext.jsx";
+import { Card, Field, Input, Textarea, Button } from "../components/ui.jsx";
 
 export default function SignupCompany() {
   const toast = useToast();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ compName: '', email: '', password: '', compDescription: '' });
+  const [form, setForm] = useState({
+    compName: "",
+    email: "",
+    password: "",
+    compDescription: "",
+  });
   const [busy, setBusy] = useState(false);
 
   function set(field) {
@@ -18,9 +23,11 @@ export default function SignupCompany() {
     e.preventDefault();
     setBusy(true);
     try {
-      await signUpCompany(form);
-      toast.success('Company account created. Check your email if confirmation is required, then log in.');
-      navigate('/login');
+      await signUp(form);
+      toast.success(
+        "Company account created. Check your email if confirmation is required, then log in.",
+      );
+      navigate("/login");
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -41,19 +48,51 @@ export default function SignupCompany() {
 
         <Card>
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <Field label="Company name"><Input required value={form.compName} onChange={set('compName')} /></Field>
+            <Field label="Company name">
+              <Input
+                required
+                value={form.compName}
+                onChange={set("compName")}
+              />
+            </Field>
             <Field label="Company email" hint="Used to log in">
-              <Input type="email" required value={form.email} onChange={set('email')} />
+              <Input
+                type="email"
+                required
+                value={form.email}
+                onChange={set("email")}
+              />
             </Field>
             <Field label="Description">
-              <Textarea rows={3} value={form.compDescription} onChange={set('compDescription')} />
+              <Textarea
+                rows={3}
+                value={form.compDescription}
+                onChange={set("compDescription")}
+              />
             </Field>
-            <Field label="Password"><Input type="password" required minLength={6} value={form.password} onChange={set('password')} /></Field>
-            <Button type="submit" disabled={busy}>{busy ? 'Creating…' : 'Create company account'}</Button>
+            <Field label="Password">
+              <Input
+                type="password"
+                required
+                minLength={6}
+                value={form.password}
+                onChange={set("password")}
+              />
+            </Field>
+            <Button type="submit" disabled={busy}>
+              {busy ? "Creating…" : "Create company account"}
+            </Button>
           </form>
 
           <p className="mt-4 text-center text-xs text-white/35">
-            Already registered? <Link to="/login" className="text-tut-red underline underline-offset-2">Log in</Link>.
+            Already registered?{" "}
+            <Link
+              to="/login"
+              className="text-tut-red underline underline-offset-2"
+            >
+              Log in
+            </Link>
+            .
           </p>
         </Card>
       </div>
