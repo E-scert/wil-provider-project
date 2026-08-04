@@ -5,7 +5,6 @@ WIL-Provider is a platform designed to connect **final-year students** with **Wo
 
 This repository contains:
 - Database schema (`migration.sql`)
-- ERD diagram (`schema_erd.puml`)
 - Documentation (`docs/` folder)
 
 ## Setup
