@@ -7,7 +7,18 @@ This repository contains:
 - Database schema (`migration.sql`)
 - Documentation (`docs/` folder)
 
-## Setup
-1. Clone the repo:
-   ```bash
-   git clone https://github.com/E-scert/wil-provider-project.git
+## Features
+- Student profile management
+- Company listings and WIL opportunities
+- Supabase Auth for secure authentication
+- PostgreSQL schema with RLS policies and triggers
+- React frontend for interactive dashboards
+- Fast data lookup and course recommendation logic
+
+## Tech Stack
+- Supabase (Auth + PostgreSQL)
+- PostgreSQL (schema, RLS, triggers)
+- React (frontend)
+- Node.js (utility scripts)
+
+
