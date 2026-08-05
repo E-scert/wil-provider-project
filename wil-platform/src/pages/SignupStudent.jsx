@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { signUp } from "../api/auth.js";
+import { signUpStudent } from "../api/auth.js";
 import { useToast } from "../context/ToastContext.jsx";
 import { Card, Field, Input, Select, Button } from "../components/ui.jsx";
 
@@ -28,7 +28,7 @@ export default function SignupStudent() {
     e.preventDefault();
     setBusy(true);
     try {
-      await signUp(form);
+      await signUpStudent(form);
       toast.success(
         "Account created. Check your email if confirmation is required, then log in.",
       );

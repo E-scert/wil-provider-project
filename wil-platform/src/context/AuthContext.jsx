@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '../lib/supabaseClient.js';
-import { loadProfile } from '../api/auth.js';
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { supabase } from "../lib/supabaseClient.js";
+import { loadProfile, provisionProfileIfNeeded } from "../api/auth.js";
 
 const AuthContext = createContext(null);
 
@@ -13,12 +13,17 @@ export function AuthProvider({ children }) {
     setSession(nextSession);
     if (nextSession?.user) {
       try {
+        // If this account signed up while email confirmation was pending, the users/student
+        // (or company) rows may not exist yet — create them now that we have a real session.
+        // No-ops instantly if already provisioned.
+        await provisionProfileIfNeeded(nextSession.user);
         const p = await loadProfile(nextSession.user.id);
         setProfile(p);
       } catch (err) {
-        // profile row may not exist yet (e.g. RLS blocked signup insert) — surface as logged in
-        // but profile-less, rather than silently failing.
-        console.error('Failed to load profile row for authenticated user:', err.message);
+        console.error(
+          "Failed to load/provision profile for authenticated user:",
+          err,
+        );
         setProfile(null);
       }
     } else {
@@ -29,9 +34,11 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => hydrate(data.session));
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      hydrate(nextSession);
-    });
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, nextSession) => {
+        hydrate(nextSession);
+      },
+    );
     return () => listener.subscription.unsubscribe();
   }, []);
 
@@ -49,6 +56,6 @@ export function AuthProvider({ children }) {
 
 export function useAuth() {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
 }

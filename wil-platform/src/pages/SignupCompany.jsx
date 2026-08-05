@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { signUp } from "../api/auth.js";
+import { signUpCompany } from "../api/auth.js";
 import { useToast } from "../context/ToastContext.jsx";
 import { Card, Field, Input, Textarea, Button } from "../components/ui.jsx";
 
@@ -23,11 +23,16 @@ export default function SignupCompany() {
     e.preventDefault();
     setBusy(true);
     try {
-      await signUp(form);
-      toast.success(
-        "Company account created. Check your email if confirmation is required, then log in.",
-      );
-      navigate("/login");
+      const result = await signUpCompany(form);
+      if (result.emailConfirmationRequired) {
+        toast.info(
+          "Check your email to confirm your account, then log in — your profile will finish setting up automatically.",
+        );
+        navigate("/login");
+      } else {
+        toast.success("Company account and profile created.");
+        navigate("/"); // already logged in — go straight to the dashboard
+      }
     } catch (err) {
       toast.error(err.message);
     } finally {
