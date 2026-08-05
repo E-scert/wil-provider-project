@@ -5,14 +5,14 @@ import DetailsForm from "./DetailsForm.jsx";
 import SkillsManager from "./SkillsManager.jsx";
 import DeleteProfile from "./DeleteProfile.jsx";
 
-export default function StudentDashboard() {
+export default function ProfileBoard() {
   const [activeTab, setActiveTab] = useState("profile");
 
   return (
     <div className="mx-auto max-w-4xl px-5 py-10">
       <SectionHeading
         eyebrow="Student"
-        title="Dashboard"
+        title="Profile"
         subtitle="Manage your account and information."
       />
 
