@@ -12,6 +12,7 @@ import ProgramListings from "./pages/ProgramListings.jsx";
 import StudentDashboard from "./pages/student/StudentDashboard.jsx";
 import StudentDocuments from "./pages/student/StudentDocuments.jsx";
 import StudentApplications from "./pages/student/StudentApplications.jsx";
+import Dashboard from "./pages/student/Dashboard.jsx";
 
 import CompanyDashboard from "./pages/company/CompanyDashboard.jsx";
 import CompanyPrograms from "./pages/company/CompanyPrograms.jsx";
@@ -59,7 +60,15 @@ export default function App() {
             }
           />
           <Route
-            path="/student/documents"
+            path="/student/dashboard"
+            element={
+              <ProtectedRoute allow={["student"]}>
+                <Dashboard /> {/* New Dashboard hub */}
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/student/dashboard/documents"
             element={
               <ProtectedRoute allow={["student"]}>
                 <StudentDocuments />
@@ -67,7 +76,7 @@ export default function App() {
             }
           />
           <Route
-            path="/student/applications"
+            path="/student/dashboard/applications"
             element={
               <ProtectedRoute allow={["student"]}>
                 <StudentApplications />

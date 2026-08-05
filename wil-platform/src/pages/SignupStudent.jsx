@@ -28,11 +28,16 @@ export default function SignupStudent() {
     e.preventDefault();
     setBusy(true);
     try {
-      await signUpStudent(form);
-      toast.success(
-        "Account created. Check your email if confirmation is required, then log in.",
-      );
-      navigate("/login");
+      const result = await signUpStudent(form);
+      if (result.emailConfirmationRequired) {
+        toast.info(
+          "Check your email to confirm your account, then log in — your profile will finish setting up automatically.",
+        );
+        navigate("/login");
+      } else {
+        toast.success("Account and profile created.");
+        navigate("/"); // already logged in — go straight to the dashboard
+      }
     } catch (err) {
       toast.error(err.message);
     } finally {

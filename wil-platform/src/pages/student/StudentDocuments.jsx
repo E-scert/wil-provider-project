@@ -1,19 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import { useAuth } from '../../context/AuthContext.jsx';
-import { useToast } from '../../context/ToastContext.jsx';
-import { getStudentDocs } from '../../api/students.js';
-import { uploadStudentDocument, getSignedDocUrl } from '../../api/storage.js';
-import { Card, SectionHeading, Button, Spinner } from '../../components/ui.jsx';
-
+import React, { useEffect, useState } from "react";
+import { useAuth } from "../../context/AuthContext.jsx";
+import { useToast } from "../../context/ToastContext.jsx";
+import { getStudentDocs } from "../../api/students.js";
+import { uploadStudentDocument, getSignedDocUrl } from "../../api/storage.js";
+import { Card, SectionHeading, Button, Spinner } from "../../components/ui.jsx";
+import { useNavigate } from "react-router-dom";
 const DOC_TYPES = [
-  { key: 'id', label: 'ID Document', pathField: 'id_doc_path' },
-  { key: 'wil', label: 'WIL Letter', pathField: 'wil_doc_path' },
-  { key: 'academic', label: 'Academic Record', pathField: 'academic_doc_path' },
+  { key: "id", label: "ID Document", pathField: "id_doc_path" },
+  { key: "wil", label: "WIL Letter", pathField: "wil_doc_path" },
+  { key: "academic", label: "Academic Record", pathField: "academic_doc_path" },
 ];
 
 export default function StudentDocuments() {
   const { profile } = useAuth();
   const toast = useToast();
+  const navigate = useNavigate();
   const [docs, setDocs] = useState(null);
   const [loading, setLoading] = useState(true);
   const [uploadingKey, setUploadingKey] = useState(null);
@@ -33,7 +34,7 @@ export default function StudentDocuments() {
       await uploadStudentDocument(profile.stud_id, docType, file);
       const refreshed = await getStudentDocs(profile.stud_id);
       setDocs(refreshed);
-      toast.success('Document uploaded.');
+      toast.success("Document uploaded.");
     } catch (err) {
       toast.error(err.message);
     } finally {
@@ -44,7 +45,7 @@ export default function StudentDocuments() {
   async function handleView(path) {
     try {
       const url = await getSignedDocUrl(path);
-      if (url) window.open(url, '_blank', 'noopener,noreferrer');
+      if (url) window.open(url, "_blank", "noopener,noreferrer");
     } catch (err) {
       toast.error(err.message);
     }
@@ -57,7 +58,6 @@ export default function StudentDocuments() {
         title="Documents"
         subtitle="Upload your ID, WIL letter, and academic record. Files are stored privately in the student-vault bucket."
       />
-
       {loading ? (
         <Spinner />
       ) : (
@@ -65,23 +65,38 @@ export default function StudentDocuments() {
           {DOC_TYPES.map((doc) => {
             const path = docs?.[doc.pathField];
             return (
-              <Card key={doc.key} className="animate-fadeUp flex items-center justify-between gap-4">
+              <Card
+                key={doc.key}
+                className="animate-fadeUp flex items-center justify-between gap-4"
+              >
                 <div>
-                  <p className="font-display text-sm font-semibold text-white">{doc.label}</p>
-                  <p className="text-xs text-white/40">{path ? 'Uploaded' : 'Not uploaded yet'}</p>
+                  <p className="font-display text-sm font-semibold text-white">
+                    {doc.label}
+                  </p>
+                  <p className="text-xs text-white/40">
+                    {path ? "Uploaded" : "Not uploaded yet"}
+                  </p>
                 </div>
                 <div className="flex items-center gap-2">
                   {path && (
-                    <Button variant="ghost" onClick={() => handleView(path)}>View</Button>
+                    <Button variant="ghost" onClick={() => handleView(path)}>
+                      View
+                    </Button>
                   )}
                   <label className="cursor-pointer">
                     <input
                       type="file"
                       className="hidden"
-                      onChange={(e) => handleUpload(doc.key, e.target.files?.[0])}
+                      onChange={(e) =>
+                        handleUpload(doc.key, e.target.files?.[0])
+                      }
                     />
                     <span className="inline-flex items-center justify-center rounded-md bg-tut-red px-4 py-2 text-sm font-medium text-white transition-all hover:bg-red-600 hover:shadow-redGlow">
-                      {uploadingKey === doc.key ? 'Uploading…' : path ? 'Replace' : 'Upload'}
+                      {uploadingKey === doc.key
+                        ? "Uploading…"
+                        : path
+                          ? "Replace"
+                          : "Upload"}
                     </span>
                   </label>
                 </div>
@@ -90,6 +105,11 @@ export default function StudentDocuments() {
           })}
         </div>
       )}
+      <div className="mt-6">
+        <Button variant="ghost" onClick={() => navigate("/student/dashboard")}>
+          ← Back to Dashboard
+        </Button>
+      </div>
     </div>
   );
 }

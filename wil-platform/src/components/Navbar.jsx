@@ -1,29 +1,33 @@
-import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext.jsx';
-import { signOut } from '../api/auth.js';
-import { useToast } from '../context/ToastContext.jsx';
+import React from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext.jsx";
+import { signOut } from "../api/auth.js";
+import { useToast } from "../context/ToastContext.jsx";
 
 const LINKS_BY_ROLE = {
   student: [
-    { to: '/student', label: 'Dashboard', end: true },
-    { to: '/student/documents', label: 'Documents' },
-    { to: '/student/applications', label: 'Applications' },
-    { to: '/programs', label: 'Browse Programs' },
+    { to: "/student", label: "ProfileBoard", end: true },
+    { to: "/student/dashboard", label: "Dashboard" },
+    { to: "/programs", label: "Browse Programs" },
   ],
   company: [
-    { to: '/company', label: 'Dashboard', end: true },
-    { to: '/company/programs', label: 'Programs' },
-    { to: '/company/applicants', label: 'Applicants' },
+    { to: "/company", label: "Dashboard", end: true },
+    { to: "/company/programs", label: "Programs" },
+    { to: "/company/applicants", label: "Applicants" },
   ],
   admin: [
-    { to: '/admin', label: 'Overview', end: true },
-    { to: '/admin/table/users', label: 'Users' },
-    { to: '/admin/table/company', label: 'Companies' },
-    { to: '/admin/table/wil_program', label: 'Programs' },
-    { to: '/admin/table/student_app', label: 'Applications' },
+    { to: "/admin", label: "Overview", end: true },
+    { to: "/admin/table/users", label: "Users" },
+    { to: "/admin/table/company", label: "Companies" },
+    { to: "/admin/table/wil_program", label: "Programs" },
+    { to: "/admin/table/student_app", label: "Applications" },
   ],
 };
+
+const DASHBOARD_LINKS = [
+  { to: "/student/dashboard/documents", label: "Documents" },
+  { to: "/student/dashboard/applications", label: "Applications" },
+];
 
 export default function Navbar() {
   const { role, user } = useAuth();
@@ -34,8 +38,8 @@ export default function Navbar() {
   async function handleLogout() {
     try {
       await signOut();
-      toast.success('Logged out.');
-      navigate('/login');
+      toast.success("Logged out.");
+      navigate("/login");
     } catch (err) {
       toast.error(err.message);
     }
@@ -59,9 +63,11 @@ export default function Navbar() {
               end={l.end}
               className={({ isActive }) =>
                 [
-                  'rounded-md px-3.5 py-1.5 text-sm font-medium transition-colors duration-200',
-                  isActive ? 'bg-tut-red/15 text-white' : 'text-white/60 hover:text-white hover:bg-tut-panel',
-                ].join(' ')
+                  "rounded-md px-3.5 py-1.5 text-sm font-medium transition-colors duration-200",
+                  isActive
+                    ? "bg-tut-red/15 text-white"
+                    : "text-white/60 hover:text-white hover:bg-tut-panel",
+                ].join(" ")
               }
             >
               {l.label}
@@ -90,7 +96,10 @@ export default function Navbar() {
             to={l.to}
             end={l.end}
             className={({ isActive }) =>
-              ['whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium', isActive ? 'bg-tut-red/15 text-white' : 'text-white/60'].join(' ')
+              [
+                "whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium",
+                isActive ? "bg-tut-red/15 text-white" : "text-white/60",
+              ].join(" ")
             }
           >
             {l.label}
