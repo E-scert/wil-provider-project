@@ -1,3 +1,5 @@
+----// Copyright (c) 2026 JR
+---// Licensed under the MIT License. See LICENSE file for details.
 
 -- =========================
 -- 1. AUTHENTICATION & CORE USERS
