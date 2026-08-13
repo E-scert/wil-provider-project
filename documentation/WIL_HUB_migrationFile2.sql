@@ -51,6 +51,7 @@ CREATE TABLE wil_programs (
     title TEXT NOT NULL,
     description TEXT,
     required_skills TEXT[],
+    eligible_courses TEXT[],
     slots_open INT,
     duration_months INT,
     open_date DATE,

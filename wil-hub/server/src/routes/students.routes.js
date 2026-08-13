@@ -7,14 +7,6 @@ const { upload } = require('../middleware/upload');
 const router = express.Router();
 router.use(requireAuth, requireRole('student'));
 
-function parseSkills(input) {
-  if (!input) return [];
-  const arr = Array.isArray(input) ? input : String(input).split(',');
-  // lowercased so skill matching (students.skills && programs.required_skills) is reliable
-  // regardless of how each side capitalized things
-  return arr.map((s) => s.trim().toLowerCase()).filter(Boolean);
-}
-
 // GET /api/students/me
 router.get('/me', asyncHandler(async (req, res) => {
   const { rows } = await pool.query('SELECT * FROM students WHERE student_id = $1', [req.user.linked_id]);
@@ -24,18 +16,17 @@ router.get('/me', asyncHandler(async (req, res) => {
 
 // PUT /api/students/me
 router.put('/me', asyncHandler(async (req, res) => {
-  const { name, programOfStudy, graduationYear, skills, availabilityDate } = req.body;
+  const { name, programOfStudy, graduationYear, availabilityDate } = req.body;
   try {
     const { rows } = await pool.query(
       `UPDATE students
        SET name = COALESCE($1, name),
            program_of_study = COALESCE($2, program_of_study),
            graduation_year = COALESCE($3, graduation_year),
-           skills = COALESCE($4, skills),
-           availability_date = COALESCE($5, availability_date)
-       WHERE student_id = $6
+           availability_date = COALESCE($4, availability_date)
+       WHERE student_id = $5
        RETURNING *`,
-      [name, programOfStudy, graduationYear, skills !== undefined ? parseSkills(skills) : null, availabilityDate, req.user.linked_id]
+      [name, programOfStudy, graduationYear, availabilityDate, req.user.linked_id]
     );
     if (!rows[0]) throw new AppError(404, 'Student profile not found.');
     res.json(rows[0]);
@@ -73,7 +64,7 @@ router.get('/me/applications', asyncHandler(async (req, res) => {
 // GET /api/students/me/matches
 router.get('/me/matches', asyncHandler(async (req, res) => {
   const { rows } = await pool.query(
-    `SELECT m.*, p.title, p.required_skills, c.name AS company_name, i.name AS institution_name
+    `SELECT m.*, p.title, p.eligible_courses, c.name AS company_name, i.name AS institution_name
      FROM matches m
      JOIN wil_programs p ON p.program_id = m.program_id
      JOIN companies c ON c.company_id = p.company_id

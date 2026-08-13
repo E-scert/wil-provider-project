@@ -125,15 +125,17 @@ export function StatCard({ label, value, tone = 'indigo' }) {
   );
 }
 
-export function SkillChips({ skills = [] }) {
-  if (!skills.length) return <span className="text-xs text-hub-muted">No skills listed</span>;
+
+export function Chips({ items = [], emptyLabel = 'None listed' }) {
+  if (!items || items.length === 0) return <span className="text-xs text-hub-muted">{emptyLabel}</span>;
   return (
     <div className="flex flex-wrap gap-1.5">
-      {skills.map((s) => (
-        <span key={s} className="rounded-full border border-hub-line bg-hub-bg px-2 py-0.5 text-xs text-hub-ink/75">
-          {s}
+      {items.map((item) => (
+        <span key={item} className="rounded-full border border-hub-line bg-hub-bg px-2 py-0.5 text-xs text-hub-ink/75">
+          {item}
         </span>
       ))}
     </div>
   );
 }
+

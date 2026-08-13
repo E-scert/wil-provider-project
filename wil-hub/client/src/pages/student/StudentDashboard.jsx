@@ -2,14 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import { getMyProfile, updateMyProfile, uploadCv } from '../../api/students.js';
-import { Card, Field, Input, Button, SectionHeading, Spinner, Badge, SkillChips } from '../../components/ui.jsx';
+import { Card, Field, Input, Button, SectionHeading, Spinner, Badge } from '../../components/ui.jsx';
 
 export default function StudentDashboard() {
   const { refresh } = useAuth();
   const toast = useToast();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({ name: '', programOfStudy: '', graduationYear: '', skills: '', availabilityDate: '' });
+  const [form, setForm] = useState({ name: '', programOfStudy: '', graduationYear: '', availabilityDate: '' });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
 
@@ -22,7 +22,6 @@ export default function StudentDashboard() {
           name: p.name || '',
           programOfStudy: p.program_of_study || '',
           graduationYear: p.graduation_year ?? '',
-          skills: (p.skills || []).join(', '),
           availabilityDate: p.availability_date ? p.availability_date.slice(0, 10) : '',
         });
       })
@@ -90,9 +89,6 @@ export default function StudentDashboard() {
               <Field label="Program of study"><Input required value={form.programOfStudy} onChange={(e) => setForm((f) => ({ ...f, programOfStudy: e.target.value }))} /></Field>
             </div>
             <Field label="Available from"><Input type="date" value={form.availabilityDate} onChange={(e) => setForm((f) => ({ ...f, availabilityDate: e.target.value }))} /></Field>
-            <div className="sm:col-span-2">
-              <Field label="Skills" hint="Comma-separated"><Input value={form.skills} onChange={(e) => setForm((f) => ({ ...f, skills: e.target.value }))} /></Field>
-            </div>
             <Button type="submit" disabled={saving} className="sm:col-span-2">{saving ? 'Saving…' : 'Save profile'}</Button>
           </form>
         </Card>
@@ -120,11 +116,6 @@ export default function StudentDashboard() {
               </span>
             </label>
           </div>
-        </Card>
-
-        <Card className="animate-riseIn">
-          <h2 className="mb-3 font-display text-base font-semibold text-hub-ink">Current skills</h2>
-          <SkillChips skills={profile?.skills} />
         </Card>
       </div>
     </div>

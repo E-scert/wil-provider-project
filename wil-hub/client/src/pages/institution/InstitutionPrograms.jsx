@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useToast } from '../../context/ToastContext.jsx';
 import { listPrograms, approveProgram, closeProgram } from '../../api/institutions.js';
-import { Card, SectionHeading, Spinner, EmptyState, Badge, Button, SkillChips } from '../../components/ui.jsx';
+import { Card, SectionHeading, Spinner, EmptyState, Badge, Button, Chips } from '../../components/ui.jsx';
 
 export default function InstitutionPrograms() {
   const toast = useToast();
@@ -73,7 +73,7 @@ export default function InstitutionPrograms() {
                     {p.company_name} {p.verified_status && <span className="text-hub-emerald">· verified company</span>}
                   </p>
                   <p className="mt-1 text-xs text-hub-muted">{p.duration_months} months · {p.slots_open} slots</p>
-                  <div className="mt-2"><SkillChips skills={p.required_skills} /></div>
+                  <div className="mt-2"><Chips items={p.eligible_courses} /></div>
                 </div>
                 <Badge tone={p.posting_status}>{p.posting_status}</Badge>
               </div>

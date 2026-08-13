@@ -10,7 +10,7 @@ export default function RegisterStudent() {
   const toast = useToast();
   const navigate = useNavigate();
   const [form, setForm] = useState({
-    name: '', email: '', password: '', programOfStudy: '', graduationYear: '', skills: '', availabilityDate: '',
+    name: '', email: '', password: '', programOfStudy: '', graduationYear: '', availabilityDate: '',
   });
   const [busy, setBusy] = useState(false);
 
@@ -53,11 +53,6 @@ export default function RegisterStudent() {
             </div>
             <Field label="Graduation year"><Input type="number" min="2024" max="2035" value={form.graduationYear} onChange={set('graduationYear')} /></Field>
             <Field label="Available from"><Input type="date" value={form.availabilityDate} onChange={set('availabilityDate')} /></Field>
-            <div className="sm:col-span-2">
-              <Field label="Skills" hint="Comma-separated — e.g. React, SQL, Figma">
-                <Input value={form.skills} onChange={set('skills')} placeholder="JavaScript, React, SQL" />
-              </Field>
-            </div>
             <div className="sm:col-span-2">
               <Field label="Password"><Input type="password" required minLength={6} value={form.password} onChange={set('password')} /></Field>
             </div>

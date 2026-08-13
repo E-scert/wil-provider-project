@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useToast } from '../../context/ToastContext.jsx';
 import { getMyApplicants } from '../../api/companies.js';
 import { updateApplicationStatus } from '../../api/programs.js';
-import { Card, SectionHeading, Spinner, EmptyState, Badge, Button, SkillChips } from '../../components/ui.jsx';
+import { Card, SectionHeading, Spinner, EmptyState, Badge, Button } from '../../components/ui.jsx';
 
 const NEXT_ACTIONS = {
   pending: [{ label: 'Shortlist', status: 'shortlisted' }, { label: 'Select', status: 'selected' }, { label: 'Reject', status: 'rejected' }],
@@ -56,7 +56,6 @@ export default function CompanyApplicants() {
                   <p className="font-display text-sm font-semibold text-hub-ink">{a.student_name}</p>
                   <p className="text-xs text-hub-indigo">{a.program_title}</p>
                   <p className="mt-1 text-xs text-hub-muted">{a.program_of_study}</p>
-                  <div className="mt-2"><SkillChips skills={a.skills} /></div>
                   <div className="mt-2 flex items-center gap-2">
                     <Badge tone={a.eligibility_status}>{a.eligibility_status}</Badge>
                     {a.cv_url && (

@@ -6,11 +6,10 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 const router = express.Router();
 router.use(requireAuth, requireRole('company_admin'));
 
-function parseSkills(input) {
+function parseList(input) {
   if (!input) return [];
   const arr = Array.isArray(input) ? input : String(input).split(',');
-  // lowercased so skill matching (students.skills && programs.required_skills) is reliable
-  // regardless of how each side capitalized things
+  // lowercased so course-name matching is reliable regardless of how each side capitalized things
   return arr.map((s) => s.trim().toLowerCase()).filter(Boolean);
 }
 
@@ -41,15 +40,19 @@ router.put('/me', asyncHandler(async (req, res) => {
 
 // POST /api/companies/me/programs — always starts as posting_status = 'pending'
 router.post('/me/programs', asyncHandler(async (req, res) => {
-  const { title, description, requiredSkills, slotsOpen, durationMonths, openDate, closeDate } = req.body;
+  const { title, description, eligibleCourses, slotsOpen, durationMonths, openDate, closeDate } = req.body;
   if (!title || !slotsOpen || !durationMonths) {
     throw new AppError(400, 'title, slotsOpen, and durationMonths are required.');
   }
+  const courses = parseList(eligibleCourses);
+  if (!courses.length) {
+    throw new AppError(400, 'eligibleCourses is required — this is what students actually get matched on (e.g. "Computer Science, Informatics").');
+  }
   try {
     const { rows } = await pool.query(
-      `INSERT INTO wil_programs (company_id, title, description, required_skills, slots_open, duration_months, open_date, close_date)
+      `INSERT INTO wil_programs (company_id, title, description, eligible_courses, slots_open, duration_months, open_date, close_date)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-      [req.user.linked_id, title, description || null, parseSkills(requiredSkills), slotsOpen, durationMonths, openDate || null, closeDate || null]
+      [req.user.linked_id, title, description || null, courses, slotsOpen, durationMonths, openDate || null, closeDate || null]
     );
     res.status(201).json(rows[0]);
   } catch (err) {
@@ -72,7 +75,7 @@ router.get('/me/applicants', asyncHandler(async (req, res) => {
     `SELECT a.application_id, a.status, a.date_applied,
             p.program_id, p.title AS program_title,
             s.student_id, s.name AS student_name, s.email AS student_email,
-            s.program_of_study, s.skills, s.eligibility_status, s.cv_url
+            s.program_of_study, s.eligibility_status, s.cv_url
      FROM applications a
      JOIN wil_programs p ON p.program_id = a.program_id
      JOIN students s ON s.student_id = a.student_id

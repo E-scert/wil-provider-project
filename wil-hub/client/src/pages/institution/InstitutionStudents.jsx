@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useToast } from '../../context/ToastContext.jsx';
 import { listStudents, setStudentEligibility } from '../../api/institutions.js';
-import { Card, SectionHeading, Spinner, EmptyState, Badge, Button, SkillChips } from '../../components/ui.jsx';
+import { Card, SectionHeading, Spinner, EmptyState, Badge, Button } from '../../components/ui.jsx';
 
 export default function InstitutionStudents() {
   const toast = useToast();

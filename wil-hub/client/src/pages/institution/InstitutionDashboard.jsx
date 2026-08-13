@@ -56,7 +56,7 @@ export default function InstitutionDashboard() {
             <Link to="/institution/matches">
               <Card className="animate-fadeUp transition-colors hover:border-hub-indigo/60">
                 <p className="font-display text-sm font-semibold text-hub-ink">Run & validate matches</p>
-                <p className="mt-1 text-xs text-hub-muted">Auto-match by skills, then approve or reject.</p>
+                <p className="mt-1 text-xs text-hub-muted">Auto-match by course of study, then approve or reject.</p>
               </Card>
             </Link>
             <Link to="/institution/reports">

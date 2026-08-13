@@ -13,8 +13,8 @@ const PERSPECTIVES = [
   },
   {
     title: 'Companies',
-    pain: 'Admin overload verifying student eligibility, mismatched skills, and compliance risk on every posting.',
-    benefit: 'Faster access to pre-vetted candidates with clear skills and availability, compliance already handled.',
+    pain: 'Admin overload verifying student eligibility, sifting through mismatched applicants, and compliance risk on every posting.',
+    benefit: 'Faster access to pre-vetted candidates from the right course of study, compliance already handled.',
   },
   {
     title: 'Institutions',
