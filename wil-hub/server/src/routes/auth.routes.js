@@ -16,19 +16,11 @@ function signToken(user) {
   );
 }
 
-function parseSkills(input) {
-  if (!input) return [];
-  const arr = Array.isArray(input) ? input : String(input).split(',');
-  // lowercased so skill matching (students.skills && programs.required_skills) is reliable
-  // regardless of how each side capitalized things
-  return arr.map((s) => s.trim().toLowerCase()).filter(Boolean);
-}
-
 // ---------------------------------------------------------------------
 // POST /api/auth/register/student
 // ---------------------------------------------------------------------
 router.post('/register/student', asyncHandler(async (req, res) => {
-  const { name, email, password, programOfStudy, graduationYear, skills, availabilityDate } = req.body;
+  const { name, email, password, programOfStudy, graduationYear, availabilityDate } = req.body;
   if (!name || !email || !password || !programOfStudy) {
     throw new AppError(400, 'name, email, password, and programOfStudy are required.');
   }
@@ -39,9 +31,9 @@ router.post('/register/student', asyncHandler(async (req, res) => {
   try {
     const result = await withTransaction(async (client) => {
       const studentRes = await client.query(
-        `INSERT INTO students (name, email, program_of_study, graduation_year, skills, availability_date)
-         VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-        [name, email, programOfStudy, graduationYear || null, parseSkills(skills), availabilityDate || null]
+        `INSERT INTO students (name, email, program_of_study, graduation_year, availability_date)
+         VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+        [name, email, programOfStudy, graduationYear || null, availabilityDate || null]
       );
       const student = studentRes.rows[0];
 
@@ -57,6 +49,8 @@ router.post('/register/student', asyncHandler(async (req, res) => {
     res.status(201).json({ token, user: result.user, entity: result.entity });
   } catch (err) {
     throw new AppError(400, formatPgError(err));
+    console.error('PG ERROR:', err);
+
   }
 }));
 
