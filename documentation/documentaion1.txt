@@ -81,3 +81,5 @@ Student Status Notification Webhook
 * When a status transitions to Accepted or Rejected (whether done manually by a company or automatically by the database cascade), catch the student's email and dispatch a notification email informing them of the intake selection update.
 
 ------------------------------
+connection string 
+postgresql://wil_db_user:xPE6SBttCnAp93HQS83zIt7bMtdhfZtX@dpg-da2n7sbbc2fs738juskg-a.oregon-postgres.render.com/wil_db

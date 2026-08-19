@@ -109,3 +109,8 @@ CREATE INDEX idx_matches_student ON matches(student_id);
 CREATE INDEX idx_matches_program ON matches(program_id);
 CREATE INDEX idx_placements_student ON placements(student_id);
 CREATE INDEX idx_placements_program ON placements(program_id);
+
+ALTER TABLE wil_programs ADD COLUMN eligible_courses TEXT[];
+
+-- Speeds up the array-containment check the matching algorithm will use
+CREATE INDEX idx_wil_programs_eligible_courses ON wil_programs USING GIN (eligible_courses);

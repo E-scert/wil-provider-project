@@ -21,6 +21,7 @@ CREATE TABLE students (
     graduation_year INT,
     cv_url TEXT,
     skills TEXT[],
+    
     availability_date DATE,
     eligibility_status TEXT CHECK (eligibility_status IN ('provisional','verified')) DEFAULT 'provisional'
 );
@@ -111,6 +112,4 @@ CREATE INDEX idx_matches_program ON matches(program_id);
 CREATE INDEX idx_placements_student ON placements(student_id);
 CREATE INDEX idx_placements_program ON placements(program_id);
 
-----super admin logins 
-  email:    admin@wilhub.local
-  password: ChangeMe123!
+

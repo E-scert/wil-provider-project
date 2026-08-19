@@ -58,7 +58,6 @@ export default function InstitutionStudents() {
               <div>
                 <p className="font-display text-sm font-semibold text-hub-ink">{s.name}</p>
                 <p className="text-xs text-hub-muted">{s.program_of_study} · class of {s.graduation_year || '—'}</p>
-                <div className="mt-2"><SkillChips skills={s.skills} /></div>
               </div>
               <div className="flex items-center gap-2">
                 <Badge tone={s.eligibility_status}>{s.eligibility_status}</Badge>

@@ -104,8 +104,8 @@ router.post('/me/generate-matches', asyncHandler(async (req, res) => {
 
 router.get('/me/matches', asyncHandler(async (req, res) => {
   const { rows } = await pool.query(
-    `SELECT m.*, s.name AS student_name, s.email AS student_email, s.skills, s.eligibility_status,
-            p.title AS program_title, p.required_skills, c.name AS company_name
+    `SELECT m.*, s.name AS student_name, s.email AS student_email, s.eligibility_status, s.program_of_study,
+            p.title AS program_title, p.eligible_courses, c.name AS company_name
      FROM matches m
      JOIN students s ON s.student_id = m.student_id
      JOIN wil_programs p ON p.program_id = m.program_id
