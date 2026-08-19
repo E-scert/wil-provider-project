@@ -24,8 +24,7 @@
  * fuzzy/substring match (e.g. ILIKE '%computer science%'). Left as exact-match for now since
  * that's a real design decision, not something to guess at silently.
  *
- * Matches are attributed to the institution that ran the match, since the schema has no fixed
- * student->institution link (see db/optional-schema-additions.sql).
+
  */
 async function generateMatches(client, institutionId) {
   const { rows } = await client.query(
