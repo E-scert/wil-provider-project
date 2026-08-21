@@ -1,12 +1,27 @@
-import React, { useEffect, useState } from 'react';
-import { useToast } from '../../context/ToastContext.jsx';
-import { getMyApplicants } from '../../api/companies.js';
-import { updateApplicationStatus } from '../../api/programs.js';
-import { Card, SectionHeading, Spinner, EmptyState, Badge, Button } from '../../components/ui.jsx';
+import React, { useEffect, useState } from "react";
+import { useToast } from "../../context/ToastContext.jsx";
+import { getMyApplicants } from "../../api/companies.js";
+import { updateApplicationStatus } from "../../api/programs.js";
+import {
+  Card,
+  SectionHeading,
+  Spinner,
+  EmptyState,
+  Badge,
+  Button,
+  StatCard,
+} from "../../components/ui.jsx";
 
 const NEXT_ACTIONS = {
-  pending: [{ label: 'Shortlist', status: 'shortlisted' }, { label: 'Select', status: 'selected' }, { label: 'Reject', status: 'rejected' }],
-  shortlisted: [{ label: 'Select', status: 'selected' }, { label: 'Reject', status: 'rejected' }],
+  pending: [
+    { label: "Shortlist", status: "shortlisted" },
+    { label: "Select", status: "selected" },
+    { label: "Reject", status: "rejected" },
+  ],
+  shortlisted: [
+    { label: "Select", status: "selected" },
+    { label: "Reject", status: "rejected" },
+  ],
   selected: [],
   rejected: [],
 };
@@ -39,27 +54,71 @@ export default function CompanyApplicants() {
     }
   }
 
-  return (
-    <div className="mx-auto max-w-3xl px-5 py-10">
-      <SectionHeading eyebrow="Company" title="Applicants" subtitle="Everyone who has applied to your programs." />
-
-      {loading ? (
+  if (loading)
+    return (
+      <div className="mx-auto max-w-2xl px-5 py-10">
         <Spinner />
-      ) : applicants.length === 0 ? (
-        <EmptyState title="No applicants yet" />
+      </div>
+    );
+
+  return (
+    <div className="mx-auto max-w-6xl px-5 py-10">
+      <SectionHeading
+        eyebrow="Applicants"
+        title="Program Applicants"
+        subtitle="Review and manage candidates for your programs"
+      />
+
+      {/* Summary stats */}
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+        <StatCard label="Total" value={applicants.length} tone="indigo" />
+        <StatCard
+          label="Pending"
+          value={applicants.filter((a) => a.status === "pending").length}
+          tone="amber"
+        />
+        <StatCard
+          label="Shortlisted"
+          value={applicants.filter((a) => a.status === "shortlisted").length}
+          tone="indigo"
+        />
+        <StatCard
+          label="Selected"
+          value={applicants.filter((a) => a.status === "selected").length}
+          tone="emerald"
+        />
+      </div>
+
+      {/* Applicant list */}
+      {applicants.length === 0 ? (
+        <EmptyState
+          title="No applicants yet"
+          subtitle="Students will appear here once they apply."
+        />
       ) : (
         <div className="stagger flex flex-col gap-3">
           {applicants.map((a) => (
             <Card key={a.application_id} className="animate-fadeUp">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <p className="font-display text-sm font-semibold text-hub-ink">{a.student_name}</p>
+                  <p className="font-display text-sm font-semibold text-hub-ink">
+                    {a.student_name}
+                  </p>
                   <p className="text-xs text-hub-indigo">{a.program_title}</p>
-                  <p className="mt-1 text-xs text-hub-muted">{a.program_of_study}</p>
+                  <p className="mt-1 text-xs text-hub-muted">
+                    {a.program_of_study}
+                  </p>
                   <div className="mt-2 flex items-center gap-2">
-                    <Badge tone={a.eligibility_status}>{a.eligibility_status}</Badge>
+                    <Badge tone={a.eligibility_status}>
+                      {a.eligibility_status}
+                    </Badge>
                     {a.cv_url && (
-                      <a href={a.cv_url} target="_blank" rel="noreferrer" className="text-xs text-hub-indigo underline underline-offset-2">
+                      <a
+                        href={a.cv_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs text-hub-indigo underline underline-offset-2"
+                      >
                         View CV
                       </a>
                     )}
@@ -71,8 +130,16 @@ export default function CompanyApplicants() {
                     {NEXT_ACTIONS[a.status]?.map((action) => (
                       <Button
                         key={action.status}
-                        variant={action.status === 'rejected' ? 'danger' : action.status === 'selected' ? 'emerald' : 'ghost'}
-                        onClick={() => handleAction(a.application_id, action.status)}
+                        variant={
+                          action.status === "rejected"
+                            ? "danger"
+                            : action.status === "selected"
+                              ? "emerald"
+                              : "ghost"
+                        }
+                        onClick={() =>
+                          handleAction(a.application_id, action.status)
+                        }
                         disabled={busyId === a.application_id}
                       >
                         {action.label}
