@@ -1,66 +1,128 @@
-import React, { useEffect, useState } from 'react';
-import { useAuth } from '../../context/AuthContext.jsx';
-import { useToast } from '../../context/ToastContext.jsx';
-import { getMyProfile, updateMyProfile } from '../../api/companies.js';
-import { Card, Field, Input, Button, SectionHeading, Spinner, Badge } from '../../components/ui.jsx';
+import React, { useEffect, useState } from "react";
+import { useToast } from "../../context/ToastContext.jsx";
+import {
+  getMyProfile,
+  getMyPrograms,
+  getMyApplicants,
+  getMyPlacements,
+} from "../../api/companies.js";
+import {
+  Card,
+  SectionHeading,
+  Spinner,
+  Badge,
+  StatCard,
+  EmptyState,
+} from "../../components/ui.jsx";
 
 export default function CompanyDashboard() {
-  const { refresh } = useAuth();
   const toast = useToast();
   const [profile, setProfile] = useState(null);
+  const [programs, setPrograms] = useState([]);
+  const [applicants, setApplicants] = useState([]);
+  const [placements, setPlacements] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [form, setForm] = useState({ name: '', industry: '', contactPerson: '' });
-  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    getMyProfile()
-      .then((p) => {
+    Promise.all([
+      getMyProfile(),
+      getMyPrograms(),
+      getMyApplicants(),
+      getMyPlacements(),
+    ])
+      .then(([p, pr, a, pl]) => {
         setProfile(p);
-        setForm({ name: p.name || '', industry: p.industry || '', contactPerson: p.contact_person || '' });
+        setPrograms(pr);
+        setApplicants(a);
+        setPlacements(pl);
       })
       .catch((err) => toast.error(err.message))
       .finally(() => setLoading(false));
   }, []); // eslint-disable-line
 
-  async function handleSave(e) {
-    e.preventDefault();
-    setSaving(true);
-    try {
-      const updated = await updateMyProfile(form);
-      setProfile(updated);
-      toast.success('Company profile updated.');
-      refresh();
-    } catch (err) {
-      toast.error(err.message);
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  if (loading) return <div className="mx-auto max-w-2xl px-5 py-10"><Spinner /></div>;
+  if (loading)
+    return (
+      <div className="mx-auto max-w-2xl px-5 py-10">
+        <Spinner />
+      </div>
+    );
 
   return (
-    <div className="mx-auto max-w-2xl px-5 py-10">
+    <div className="mx-auto max-w-6xl px-5 py-10">
       <SectionHeading
-        eyebrow="Company"
+        eyebrow="Dashboard"
         title={profile?.name}
-        subtitle="Manage your company profile."
-        action={<Badge tone={profile?.verified_status ? 'verified' : 'pending'}>{profile?.verified_status ? 'verified' : 'unverified'}</Badge>}
+        subtitle="Overview of your company activity"
+        action={
+          <Badge tone={profile?.verified_status ? "verified" : "pending"}>
+            {profile?.verified_status ? "Verified" : "Unverified"}
+          </Badge>
+        }
       />
 
-      <Card className="animate-riseIn">
-        <form onSubmit={handleSave} className="flex flex-col gap-4">
-          <Field label="Company name"><Input required value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} /></Field>
-          <Field label="Industry"><Input value={form.industry} onChange={(e) => setForm((f) => ({ ...f, industry: e.target.value }))} /></Field>
-          <Field label="Contact person"><Input value={form.contactPerson} onChange={(e) => setForm((f) => ({ ...f, contactPerson: e.target.value }))} /></Field>
-          <Button type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save profile'}</Button>
-        </form>
+      {/* Stat cards */}
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+        <StatCard label="Programs" value={programs.length} tone="indigo" />
+        <StatCard
+          label="Pending"
+          value={programs.filter((p) => p.posting_status === "pending").length}
+          tone="amber"
+        />
+        <StatCard
+          label="Approved"
+          value={programs.filter((p) => p.posting_status === "approved").length}
+          tone="emerald"
+        />
+        <StatCard label="Placements" value={placements.length} tone="indigo" />
+      </div>
+
+      {/* Recent applicants */}
+      <Card className="mb-6">
+        <h2 className="font-display text-lg font-semibold text-hub-ink mb-4">
+          Recent Applicants
+        </h2>
+        {applicants.length === 0 ? (
+          <EmptyState title="No applicants yet" />
+        ) : (
+          <ul className="divide-y divide-hub-line">
+            {applicants.slice(0, 5).map((a) => (
+              <li
+                key={a.application_id}
+                className="py-2 text-sm text-hub-ink flex justify-between"
+              >
+                <span>
+                  {a.student_name} applied to {a.program_title}
+                </span>
+                <Badge tone={a.status}>{a.status}</Badge>
+              </li>
+            ))}
+          </ul>
+        )}
       </Card>
-      {!profile?.verified_status && (
-        <p className="mt-4 text-xs text-hub-muted">
-          Your account is unverified. A super admin can verify your company to display a trust badge to students.
-        </p>
-      )}
+
+      {/* Recent placements */}
+      <Card>
+        <h2 className="font-display text-lg font-semibold text-hub-ink mb-4">
+          Recent Placements
+        </h2>
+        {placements.length === 0 ? (
+          <EmptyState title="No placements yet" />
+        ) : (
+          <ul className="divide-y divide-hub-line">
+            {placements.slice(0, 5).map((p) => (
+              <li
+                key={p.placement_id}
+                className="py-2 text-sm text-hub-ink flex justify-between"
+              >
+                <span>
+                  {p.student_name} → {p.title}
+                </span>
+                <Badge tone={p.completion_status}>{p.completion_status}</Badge>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
     </div>
   );
 }
