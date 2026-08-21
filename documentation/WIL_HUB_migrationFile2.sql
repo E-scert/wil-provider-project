@@ -51,14 +51,30 @@ CREATE TABLE wil_programs (
     company_id INT REFERENCES companies(company_id) ON DELETE CASCADE,
     title TEXT NOT NULL,
     description TEXT,
-    required_skills TEXT[],
-    eligible_courses TEXT[],
-    slots_open INT,
-    duration_months INT,
-    open_date DATE,
-    close_date DATE,
-    posting_status TEXT CHECK (posting_status IN ('pending','approved','closed')) DEFAULT 'pending'
+    eligible_courses TEXT[] NOT NULL,   -- core matching field
+    duration_months INT,                -- optional
+    open_date DATE,                     -- optional
+    close_date DATE NOT NULL,           -- always required
+    posting_status TEXT CHECK (
+        posting_status IN ('pending','approved','closed')
+    ) DEFAULT 'pending',
+
+    -- Application handling
+    application_method TEXT CHECK (
+        application_method IN ('email','portal')
+    ) NOT NULL,
+    application_email TEXT,
+    application_link TEXT,
+
+    -- Constraint: enforce correct field usage
+    CONSTRAINT application_method_check
+        CHECK (
+            (application_method = 'email' AND application_email IS NOT NULL AND application_link IS NULL)
+            OR
+            (application_method = 'portal' AND application_link IS NOT NULL AND application_email IS NULL)
+        )
 );
+
 
 -- Applications
 CREATE TABLE applications (
