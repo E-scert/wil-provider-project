@@ -32,6 +32,7 @@ export default function CompanyPrograms() {
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState(emptyForm);
   const [creating, setCreating] = useState(false);
+  const [showForm, setShowForm] = useState(false);
 
   function load() {
     setLoading(true);
@@ -53,6 +54,7 @@ export default function CompanyPrograms() {
       await postProgram(form);
       toast.success("Program submitted for institution review.");
       setForm(emptyForm);
+      setShowForm(false);
       load();
     } catch (err) {
       toast.error(err.message);
@@ -62,114 +64,23 @@ export default function CompanyPrograms() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-5 py-10">
+    <div className="mx-auto max-w-6xl px-5 py-10">
       <SectionHeading
-        eyebrow="Company"
+        eyebrow="Programs"
         title="WIL Programs"
-        subtitle="Post new placements — each goes through institution review before it's public."
+        subtitle="Manage your placements"
+        action={
+          <Button onClick={() => setShowForm(true)}>+ New Program</Button>
+        }
       />
 
-      <Card className="mb-6 animate-riseIn">
-        <h2 className="mb-4 font-display text-base font-semibold text-hub-ink">
-          Post a new program
-        </h2>
-        <form onSubmit={handleCreate} className="grid gap-4 sm:grid-cols-2">
-          <div className="sm:col-span-2">
-            <Field label="Title">
-              <Input required value={form.title} onChange={set("title")} />
-            </Field>
-          </div>
-          <div className="sm:col-span-2">
-            <Field label="Description">
-              <Textarea
-                rows={3}
-                value={form.description}
-                onChange={set("description")}
-              />
-            </Field>
-          </div>
-          <div className="sm:col-span-2">
-            <Field
-              label="Eligible courses"
-              hint="Comma-separated — e.g. 'Computer Science, Informatics'"
-            >
-              <Input
-                required
-                value={form.eligibleCourses}
-                onChange={set("eligibleCourses")}
-                placeholder="Computer Science, Informatics"
-              />
-            </Field>
-          </div>
-          <Field label="Duration (months)">
-            <Input
-              type="number"
-              min="1"
-              value={form.durationMonths}
-              onChange={set("durationMonths")}
-            />
-          </Field>
-          <Field label="Open date">
-            <Input
-              type="date"
-              value={form.openDate}
-              onChange={set("openDate")}
-            />
-          </Field>
-          <Field label="Close date">
-            <Input
-              type="date"
-              required
-              value={form.closeDate}
-              onChange={set("closeDate")}
-            />
-          </Field>
-
-          <div className="sm:col-span-2">
-            <Field label="Application Method">
-              <select
-                value={form.applicationMethod}
-                onChange={set("applicationMethod")}
-                className="rounded-md border border-hub-line bg-hub-bg px-3 py-2 text-sm text-hub-ink outline-none transition-colors focus:border-hub-indigo"
-              >
-                <option value="email">Email</option>
-                <option value="portal">Portal</option>
-              </select>
-            </Field>
-          </div>
-
-          {form.applicationMethod === "email" && (
-            <Field label="Application Email">
-              <Input
-                required
-                value={form.applicationEmail}
-                onChange={set("applicationEmail")}
-              />
-            </Field>
-          )}
-
-          {form.applicationMethod === "portal" && (
-            <Field label="Application Portal Link">
-              <Input
-                required
-                value={form.applicationLink}
-                onChange={set("applicationLink")}
-              />
-            </Field>
-          )}
-
-          <Button type="submit" disabled={creating} className="sm:col-span-2">
-            {creating ? "Submitting…" : "Submit for review"}
-          </Button>
-        </form>
-      </Card>
-
+      {/* Programs list */}
       {loading ? (
         <Spinner />
       ) : programs.length === 0 ? (
         <EmptyState title="No programs posted yet" />
       ) : (
-        <div className="stagger flex flex-col gap-3">
+        <div className="grid gap-6 sm:grid-cols-2">
           {programs.map((p) => (
             <Card key={p.program_id} className="animate-fadeUp">
               <div className="flex items-start justify-between gap-4">
@@ -188,13 +99,13 @@ export default function CompanyPrograms() {
                   </div>
 
                   {p.application_method === "email" ? (
-                    <Field label="Application Method">
+                    <Field label="Application Email">
                       <span className="text-hub-ink font-medium">
                         {p.application_email}
                       </span>
                     </Field>
                   ) : (
-                    <Field label="Application Method">
+                    <Field label="Application Portal">
                       <a
                         href={p.application_link}
                         target="_blank"
@@ -211,6 +122,107 @@ export default function CompanyPrograms() {
             </Card>
           ))}
         </div>
+      )}
+
+      {/* Modal form */}
+      {showForm && (
+        <Card className="mt-8 animate-riseIn">
+          <h2 className="mb-4 font-display text-base font-semibold text-hub-ink">
+            Post a new program
+          </h2>
+          <form onSubmit={handleCreate} className="grid gap-4 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <Field label="Title">
+                <Input required value={form.title} onChange={set("title")} />
+              </Field>
+            </div>
+            <div className="sm:col-span-2">
+              <Field label="Description">
+                <Textarea
+                  rows={3}
+                  value={form.description}
+                  onChange={set("description")}
+                />
+              </Field>
+            </div>
+            <div className="sm:col-span-2">
+              <Field
+                label="Eligible courses"
+                hint="Comma-separated — e.g. 'Computer Science, Informatics'"
+              >
+                <Input
+                  required
+                  value={form.eligibleCourses}
+                  onChange={set("eligibleCourses")}
+                />
+              </Field>
+            </div>
+            <Field label="Duration (months)">
+              <Input
+                type="number"
+                min="1"
+                value={form.durationMonths}
+                onChange={set("durationMonths")}
+              />
+            </Field>
+            <Field label="Open date">
+              <Input
+                type="date"
+                value={form.openDate}
+                onChange={set("openDate")}
+              />
+            </Field>
+            <Field label="Close date">
+              <Input
+                type="date"
+                required
+                value={form.closeDate}
+                onChange={set("closeDate")}
+              />
+            </Field>
+
+            <div className="sm:col-span-2">
+              <Field label="Application Method">
+                <select
+                  value={form.applicationMethod}
+                  onChange={set("applicationMethod")}
+                  className="rounded-md border border-hub-line bg-hub-bg px-3 py-2 text-sm text-hub-ink"
+                >
+                  <option value="email">Email</option>
+                  <option value="portal">Portal</option>
+                </select>
+              </Field>
+            </div>
+
+            {form.applicationMethod === "email" && (
+              <Field label="Application Email">
+                <Input
+                  required
+                  value={form.applicationEmail}
+                  onChange={set("applicationEmail")}
+                />
+              </Field>
+            )}
+            {form.applicationMethod === "portal" && (
+              <Field label="Application Portal Link">
+                <Input
+                  required
+                  value={form.applicationLink}
+                  onChange={set("applicationLink")}
+                />
+              </Field>
+            )}
+
+            <div className="sm:col-span-2 flex gap-2">
+              <Button type="submit" disabled={creating}>
+                {creating ? "Submitting…" : "Submit for review"}
+              </Button>
+              <Button variant="ghost" onClick={() => setShowForm(false)}>
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </Card>
       )}
     </div>
   );
