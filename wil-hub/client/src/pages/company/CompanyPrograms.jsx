@@ -186,18 +186,22 @@ export default function CompanyPrograms() {
                     <Chips items={p.eligible_courses} />
                   </div>
                   {p.application_method === "email" ? (
-                    <p className="mt-2 text-xs text-hub-muted">
-                      Apply via email: {p.application_email}
+                    <p className="mt-2 text-xs text-gray-600">
+                      Apply via email:{" "}
+                      <span className="font-medium text-gray-800">
+                        {p.application_email || "—"}
+                      </span>
                     </p>
                   ) : (
-                    <p className="mt-2 text-xs text-hub-muted">
+                    <p className="mt-2 text-xs text-gray-600">
                       Apply via portal:{" "}
                       <a
                         href={p.application_link}
                         target="_blank"
                         rel="noopener noreferrer"
+                        className="text-blue-600 underline hover:text-blue-800"
                       >
-                        {p.application_link}
+                        {p.application_link || "—"}
                       </a>
                     </p>
                   )}
