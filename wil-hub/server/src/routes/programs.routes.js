@@ -52,22 +52,29 @@ router.post(
       applicationLink,
     } = req.body;
 
+    if (!title || !eligibleCourses || !closeDate || !applicationMethod) {
+      throw new AppError(
+        400,
+        "Title, eligibleCourses, closeDate, and applicationMethod are required.",
+      );
+    }
+
     const { rows } = await pool.query(
       `INSERT INTO wil_programs
-     (company_id, title, description, eligible_courses, duration_months, open_date, close_date, application_method, application_email, application_link)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
-     RETURNING *`,
+       (company_id, title, description, eligible_courses, duration_months, open_date, close_date, application_method, application_email, application_link)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+       RETURNING *`,
       [
         company_id,
         title,
         description,
-        eligibleCourses.split(","),
+        eligibleCourses.split(",").map((c) => c.trim()), // ensure array
         durationMonths || null,
         openDate || null,
         closeDate,
         applicationMethod,
-        applicationEmail || null,
-        applicationLink || null,
+        applicationMethod === "email" ? applicationEmail : null,
+        applicationMethod === "portal" ? applicationLink : null,
       ],
     );
 
