@@ -130,6 +130,7 @@ export default function CompanyPrograms() {
               <select
                 value={form.applicationMethod}
                 onChange={set("applicationMethod")}
+                className="rounded-md border border-hub-line bg-hub-bg px-3 py-2 text-sm text-hub-ink outline-none transition-colors focus:border-hub-indigo"
               >
                 <option value="email">Email</option>
                 <option value="portal">Portal</option>
@@ -179,16 +180,17 @@ export default function CompanyPrograms() {
                   <p className="text-xs text-hub-muted">
                     {p.duration_months} months
                   </p>
-                  <p className="mt-2 text-xs uppercase tracking-widest text-hub-indigo/80">
+                  <p className="mt-2 text-xs uppercase tracking-widest text-hub-indigo">
                     Eligible courses
                   </p>
                   <div className="mt-1">
                     <Chips items={p.eligible_courses} />
                   </div>
+
                   {p.application_method === "email" ? (
                     <Field label="Application Method">
                       <span className="text-hub-ink font-medium">
-                        Apply via email: {p.application_email || "—"}
+                        {p.application_email}
                       </span>
                     </Field>
                   ) : (
@@ -197,9 +199,9 @@ export default function CompanyPrograms() {
                         href={p.application_link}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-hub-indigo hover:underline hover:text-hub-indigo/80 font-medium"
+                        className="text-hub-indigo hover:underline font-medium"
                       >
-                        Apply via portal: {p.application_link || "—"}
+                        {p.application_link}
                       </a>
                     </Field>
                   )}
